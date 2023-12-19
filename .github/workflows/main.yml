@@ -1,0 +1,38 @@
+name: Automated Review Assignment
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  assign-reviewers:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Determine Reviewers
+        id: determine-reviewers
+        run: |
+          # Add your logic to determine reviewers dynamically
+          # For example, select reviewers based on file paths, labels, or other criteria
+          # In this example, we'll use a simple static list of reviewers
+
+          reviewers="user1 user2"
+
+          # Output the reviewers as a step output
+          echo "::set-output name=reviewers::$reviewers"
+
+      - name: Set Reviewers
+        run: |
+          # Retrieve the reviewers from the previous step's output
+          reviewers="${{ steps.determine-reviewers.outputs.reviewers }}"
+
+          # Set reviewers for the pull request
+          echo "Assigning reviewers: $reviewers"
+          gh pr review-request -R $GITHUB_REPOSITORY -B $GITHUB_ACTOR -r $reviewers ${{ github.event.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
